@@ -50,6 +50,21 @@ function movePlayer(dt)
     elseif love.keyboard.isDown("down") then
         player.y = player.y + player.speed * dt
     end
+
+    if love.keyboard.isDown("d") and love.keyboard.isDown("w") then
+        player.x = player.x + player.speed * dt * 0.3
+        player.y = player.y - player.speed * dt * 0.3
+    elseif love.keyboard.isDown("d") and love.keyboard.isDown("s") then
+        player.x = player.x + player.speed * dt * 0.3
+        player.y = player.y + player.speed * dt * 0.5
+    elseif love.keyboard.isDown("a") and love.keyboard.isDown("s") then
+        player.x = player.x - player.speed * dt * 0.3
+        player.y = player.y + player.speed * dt * 0.5
+    elseif love.keyboard.isDown("a") and love.keyboard.isDown("w") then
+        player.x = player.x + player.speed * dt * 0.3
+        player.y = player.y - player.speed * dt * 0.5
+    end
+
     if love.keyboard.isDown("d") then
         player.x = player.x + player.speed * dt
     elseif love.keyboard.isDown("a") then
