@@ -6,7 +6,7 @@ function checkCollision(dt)
         local distanceY = v.y - closestY
         local distance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
         if distance < v.w then
-            love.event.quit()
+            gameOver = true
         end
 	end
 end
