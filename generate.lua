@@ -14,7 +14,7 @@ function createPlayer()
     p.y = love.graphics.getHeight() - 100
     p.w = 20
     p.h = 20
-    p.speed = 220
+    p.speed = 320
     player = p
 end
 

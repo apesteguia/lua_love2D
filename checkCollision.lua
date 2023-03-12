@@ -1,7 +1,12 @@
 function checkCollision(dt)
 	for i, v in ipairs(enemies) do
-		if v.x == player.x or v.y == player.y then
-			love.event.quit()
-		end
+        local closestX = math.max(player.x, math.min(v.x, player.x + player.w))
+        local closestY = math.max(player.y, math.min(v.y, player.y + player.h))
+        local distanceX = v.x - closestX
+        local distanceY = v.y - closestY
+        local distance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
+        if distance < v.w then
+            love.event.quit()
+        end
 	end
 end

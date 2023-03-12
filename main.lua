@@ -1,4 +1,5 @@
 package.path = package.path .. ";./?.lua;./?/init.lua"
+love.math = require("love.math")
 require("move")
 require("generate")
 require("checkCollision")
@@ -34,13 +35,13 @@ function love.update(dt)
     timer = timer + dt
     score = math.floor((love.timer.getTime() + startTime) / 1)
     moveStars(dt)
-    checkCollision(dt)
     moveEnemy(speed, dt)
     deleteEnemies()
     deleteStars()
+    checkCollision(dt)
     if timer >= 1 and x < 10 then
         r, g, b = love.math.random(), love.math.random(), love.math.random()
-        generateEnemy(200)
+        generateEnemy(440)
         timer = 0
         x = x + 1
         speed = speed + 20
