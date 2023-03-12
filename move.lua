@@ -4,15 +4,19 @@ function moveStars(dt)
     end
 end
 
-function moveEnemy(dt)
+function moveEnemy(speed, dt)
+    local speedEnemy = love.math.random(1, 200)
     for i, v in ipairs(enemies) do
-        v.y = v.y + 100 * dt
+        v.y = v.y + (speed + speedEnemy) * dt
     end
 end
 
 function movePlayer(dt)
     if love.keyboard.isDown("space") then
         love.event.quit()
+    end
+    if love.keyboard.isDown("g") then
+        mode = "win"
     end
     if player.x > 0 and player.x < windowWidth - player.w and player.y > 0 and player.y < windowHeight - player.h then
         if love.keyboard.isDown("d") and love.keyboard.isDown("w") then

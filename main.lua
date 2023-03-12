@@ -1,39 +1,65 @@
 package.path = package.path .. ";./?.lua;./?/init.lua"
 require("move")
 require("generate")
+require("checkCollision")
+require("optimization")
 
 function love.load()
     windowWidth = 1000
     windowHeight = 600
     love.window.setMode(windowWidth, windowHeight, {
-            resizable = false,
-            vsync = true,
-            fullscreen = false,
-            centered = true
-        })
+        resizable = false,
+        vsync = true,
+        fullscreen = false,
+        centered = true
+    })
+    font1 = love.graphics.newFont(32)
+    font2 = love.graphics.newFont(16)
+    font3 = love.graphics.newFont(100)
+    love.graphics.setFont(font1)
     r, g, b = 1, 1, 1
     timer = 0
+    score = 0
+    startTime = love.timer.getTime()
     i = true
     stars = {}
     enemies = {}
     player = {}
+    mode = "easy"
+    speed = 200
 end
 
 function love.update(dt)
+    local x = 0
     timer = timer + dt
+    score = math.floor((love.timer.getTime() + startTime) / 1)
     moveStars(dt)
-    moveEnemy(dt)
-    if timer >= 1 then
-        r, g, b = love.math.random() , love.math.random() , love.math.random() 
-        generateEnemy()
+    deleteEnemies()
+    checkCollision(dt)
+    moveEnemy(speed, dt)
+    if timer >= 1 and x < 10 then
+        r, g, b = love.math.random(), love.math.random(), love.math.random()
+        generateEnemy(200)
         timer = 0
+        x = x + 1
+        speed = speed + 20
     end
     if i == true then
         createPlayer()
-        generateStars() 
+        generateStars()
         i = false
     end
-    
+    if score > 15 and score < 25 then
+        mode = "medium"
+    elseif score > 25 and score < 35 then
+        mode = "hard"
+    elseif score > 35 then
+        mode = "god"
+    elseif score == 69 then
+        mode = "win"
+    elseif score == 78 then
+        love.event.quit()
+    end
     movePlayer(dt)
 end
 
@@ -41,253 +67,18 @@ function love.draw(dt)
     love.graphics.points(stars)
     love.graphics.rectangle("fill", player.x, player.y, player.w, player.h)
     for i, v in ipairs(enemies) do
+        love.graphics.print("enemi1 " .. i, 20, 90)
         love.graphics.setColor(r, g, b)
         love.graphics.circle("fill", v.x, v.y, v.w, v.h)
         love.graphics.setColor(255, 255, 255)
     end
-end
-
-
---[[
-function love.draw()
-    love.graphics.circle("fill", rect.x, rect.y, rect.width, rect.heigth)
-end
-
-function love.load()
-    rect = {}
-    rect.x = 100
-    rect.y = 100
-    rect.width = 20
-    rect.heigth = 20
-    rect.coord = {true, false, false, false}
-    --derecha izquierda arriba abajo
-end
-
-function setFalse(tabla)
-    for i, _ in ipairs(tabla) do
-        tabla[i] = false
+    love.graphics.setFont(font1)
+    love.graphics.print("Score: " .. score, 20, 20)
+    love.graphics.setFont(font2)
+    love.graphics.print("Press SPACE to Exit", 800, 550)
+    love.graphics.print("Mode: " .. mode, 30, 60)
+    if mode == "win" then
+        love.graphics.setFont(font3)
+        love.graphics.print("YOU WIN!", 250, 100)
     end
 end
-
-function love.keypressed(key)
-    if key == "down" then
-        setFalse(rect.coord)
-        rect.coord[4] = true
-    elseif key == "up" then
-        setFalse(rect.coord)
-        rect.coord[3] = true
-    elseif key == "right" then
-        setFalse(rect.coord)
-        rect.coord[1] = true
-    elseif key == "left" then
-        setFalse(rect.coord)
-        rect.coord[2] = true
-    elseif key == "space" then
-        rect.width = rect.width + 5
-        rect.heigth = rect.heigth + 5
-    end
-end
-
-function love.update(dt)
-    if rect.coord[1] == true then
-        rect.x = rect.x + 200 * dt
-        if rect.x == 600 then
-            setFalse(rect.coord)
-            rect.coord[2] = true
-        end
-    elseif rect.coord[2] == true then
-        rect.x = rect.x - 200 * dt
-    elseif rect.coord[4] == true then
-        rect.y = rect.y + 200 * dt
-    elseif rect.coord[3] == true then
-        rect.y = rect.y - 200 * dt
-    end
-end
-
-
-mouse = false
-
-function love.load()
-    elementos = {}
-end
-
-function love.draw(dt)
-    for i, v in ipairs(elementos) do
-        --love.graphics.circle("fill", v.x, v.y, v.w, v.h)
-          love.graphics.arc( "fill", 400, 300, 100, 0, math.pi )
-    end
-end
-
-function añadirElementos()
-    local tamaño = 10
-    e = {}
-    e.x = love.mouse.getX()
-    e.y = love.mouse.getY()
-    e.w = tamaño
-    e.h = tamaño
-
-    table.insert(elementos, e)
-end
-
-function love.mousepressed()
-    mouse = true
-end
-
-function love.mousereleased()
-    mouse = false
-end
-
-function love.update(dt)
-    if mouse == true then
-        añadirElementos()
-    end
-end
-
-
-
-function love.load()
-    love.window.setMode(1000, 600, {
-            resizable = false,
-            vsync = true,
-            fullscreen = false,
-            centered = true
-        })
-    timer = 0
-    i = true
-    stars = {}
-    enemigos = {}
-    player = {}
-end
-
-function createPlayer()
-    p = {}
-    p.x = love.graphics.getWidth() / 2.2
-    p.y = love.graphics.getHeight() - 100
-    p.w = 50
-    p.h = 50
-    p.speed = 220
-    player = p
-end
-
-function generateStars()
-    local screen_width, screen_height = love.graphics.getDimensions()
-    local max_stars = 10000   -- how many stars we want
-
-    for i=1, max_stars do   -- generate the coords of our stars
-        local x = love.math.random(5, screen_width-5)
-        local y = love.math.random(-20000, 600)
-        stars[i] = {x, y}   -- stick the values into the table
-    end
-end
-
-function moveStars(dt)
-    for i, v in ipairs(stars) do
-        stars[i][2] = stars[i][2] + 100 * dt
-    end
-end
-
-function movePlayer(dt)
-    if love.keyboard.isDown("right") then
-        player.x = player.x + player.speed * dt
-    elseif love.keyboard.isDown("left") then
-        player.x = player.x - player.speed * dt
-    elseif love.keyboard.isDown("up") then
-        player.y = player.y - player.speed * dt
-    elseif love.keyboard.isDown("down") then
-        player.y = player.y + player.speed * dt
-    end
-    if love.keyboard.isDown("d") then
-        player.x = player.x + player.speed * dt
-    elseif love.keyboard.isDown("a") then
-        player.x = player.x - player.speed * dt
-    elseif love.keyboard.isDown("w") then
-        player.y = player.y - player.speed * dt
-    elseif love.keyboard.isDown("s") then
-        player.y = player.y + player.speed * dt
-    end
-end
-
-function love.update(dt)
-    movePlayer(dt)
-    timer = timer + dt
-    moveStars(dt)
-    if i == true then
-        createPlayer()
-        generateStars()
-        i = false
-    end
-
-end
-
-function love.draw(dt)
-    love.graphics.points(stars)
-    love.graphics.rectangle("fill", player.x, player.y, player.w, player.h)
-end
-
---[[
-
-function love.load()
-    timer = 0
-    stars = {}
-end
-function generateStars()
-    local screen_width, screen_height = love.graphics.getDimensions()
-    local max_stars = 50   -- how many stars we want
-
-    for i=1, max_stars do   -- generate the coords of our stars
-        local x = love.math.random(5, screen_width-5)
-        local y = love.math.random(5, screen_width-5)
-        stars[i] = {x, y}   -- stick the values into the table
-    end
-end
-
-function moveStars(dt)
-    for i, v in ipairs(stars) do
-        stars[i][2] = stars[i][2] + 100 * dt
-    end
-end
-
-function love.update(dt)
-    timer = timer + dt
-    moveStars(dt)
-    if timer >= 1 then
-        generateStars()
-        timer = 0
-    end
-end
-
-function love.draw()
-    love.graphics.points(stars)
-end
-
-
---[[
-
-
-function love.load()
-  -- Inicializar el temporizador a 0
-  timer = 0
-
-  -- Crear una lista vacía de objetos
-  objects = {}
-end
-
-function love.update(dt)
-  -- Incrementar el temporizador por dt
-  timer = timer + dt
-
-  -- Si el temporizador ha alcanzado los 2 segundos, crear un nuevo objeto
-  if timer >= 2 then
-    table.insert(objects, {x = math.random(0, love.graphics.getWidth()), y = math.random(0, love.graphics.getHeight())})
-    timer = 0
-  end
-end
-
-function love.draw()
-  -- Dibujar todos los objetos en la lista
-  for i, object in ipairs(objects) do
-    love.graphics.rectangle("fill", object.x, object.y, 50, 50)
-  end
-end
-
---]]

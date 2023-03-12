@@ -1,10 +1,10 @@
-function generateEnemy()
+function generateEnemy(speed)
     local e = {}
     e.x = love.math.random(10, 1000)
     e.y = 10
     e.w = 60
     e.h = 60
-    e.speed = 200
+    e.speed = speed
     table.insert(enemies, e)
 end
 
@@ -12,8 +12,8 @@ function createPlayer()
     local p = {}
     p.x = love.graphics.getWidth() / 2.2
     p.y = love.graphics.getHeight() - 100
-    p.w = 50
-    p.h = 50
+    p.w = 20
+    p.h = 20
     p.speed = 220
     player = p
 end
