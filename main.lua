@@ -29,11 +29,12 @@ function love.load()
     player = {}
     mode = "easy"
     gameOver = false
+    gameWin = false
     speed = 200
 end
 
 function love.update(dt)
-    if gameOver == false then
+    if gameOver == false and gameWin == false then
         local x = 0
         timer = timer + dt
         score = math.floor((love.timer.getTime() + startTime) / 1)
@@ -61,12 +62,12 @@ function love.update(dt)
         elseif score > 35 then
             mode = "god"
         elseif score == 69 then
-            mode = "win"
+            gameWin = true
         elseif score == 78 then
             love.event.quit()
         end
         movePlayer(dt)
-    elseif gameOver == true then
+    elseif gameOver == true or gameWin == true then
         exit()
     end
 end
@@ -92,5 +93,7 @@ function love.draw(dt)
         end
     elseif gameOver == true then
         setGameOver()
+    elseif gameWin == true then
+        setWinGame()
     end
 end
