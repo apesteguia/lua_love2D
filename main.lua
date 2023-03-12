@@ -1,6 +1,8 @@
 package.path = package.path .. ";./?.lua;./?/init.lua"
 function love.load()
-    love.window.setMode(1000, 600, {
+    windowWidth = 1000
+    windowHeight = 600
+    love.window.setMode(windowWidth, windowHeight, {
             resizable = false,
             vsync = true,
             fullscreen = false,
@@ -9,12 +11,22 @@ function love.load()
     timer = 0
     i = true
     stars = {}
-    enemigos = {}
+    enemies = {}
     player = {}
 end
 
+function generateEnemy()
+    local e = {}
+    e.x = love.math.random(10, 1000)
+    e.y = 10
+    e.w = 60
+    e.h = 60
+    e.speed = 200
+    table.insert(enemies, e)
+end
+
 function createPlayer()
-    p = {}
+    local p = {}
     p.x = love.graphics.getWidth() / 2.2
     p.y = love.graphics.getHeight() - 100
     p.w = 50
@@ -41,56 +53,70 @@ function moveStars(dt)
 end
 
 function movePlayer(dt)
-    if love.keyboard.isDown("right") then
-        player.x = player.x + player.speed * dt
-    elseif love.keyboard.isDown("left") then
-        player.x = player.x - player.speed * dt
-    elseif love.keyboard.isDown("up") then
-        player.y = player.y - player.speed * dt
-    elseif love.keyboard.isDown("down") then
-        player.y = player.y + player.speed * dt
+    if love.keyboard.isDown("space") then
+        love.event.quit()
     end
+    if player.x > 0 and player.x < windowWidth - player.w and player.y > 0 and player.y < windowHeight - player.h then
+        if love.keyboard.isDown("d") and love.keyboard.isDown("w") then
+            player.x = player.x + player.speed * dt * 0.3
+            player.y = player.y - player.speed * dt * 0.3
+        elseif love.keyboard.isDown("d") and love.keyboard.isDown("s") then
+            player.x = player.x + player.speed * dt * 0.3
+            player.y = player.y + player.speed * dt * 0.5
+        elseif love.keyboard.isDown("a") and love.keyboard.isDown("s") then
+            player.x = player.x - player.speed * dt * 0.3
+            player.y = player.y + player.speed * dt * 0.5
+        elseif love.keyboard.isDown("a") and love.keyboard.isDown("w") then
+            player.x = player.x + player.speed * dt * 0.3
+            player.y = player.y - player.speed * dt * 0.5
+        end
 
-    if love.keyboard.isDown("d") and love.keyboard.isDown("w") then
-        player.x = player.x + player.speed * dt * 0.3
-        player.y = player.y - player.speed * dt * 0.3
-    elseif love.keyboard.isDown("d") and love.keyboard.isDown("s") then
-        player.x = player.x + player.speed * dt * 0.3
-        player.y = player.y + player.speed * dt * 0.5
-    elseif love.keyboard.isDown("a") and love.keyboard.isDown("s") then
-        player.x = player.x - player.speed * dt * 0.3
-        player.y = player.y + player.speed * dt * 0.5
-    elseif love.keyboard.isDown("a") and love.keyboard.isDown("w") then
-        player.x = player.x + player.speed * dt * 0.3
-        player.y = player.y - player.speed * dt * 0.5
-    end
-
-    if love.keyboard.isDown("d") then
-        player.x = player.x + player.speed * dt
-    elseif love.keyboard.isDown("a") then
-        player.x = player.x - player.speed * dt
-    elseif love.keyboard.isDown("w") then
-        player.y = player.y - player.speed * dt
-    elseif love.keyboard.isDown("s") then
-        player.y = player.y + player.speed * dt
-    end
+        if love.keyboard.isDown("d") then
+            player.x = player.x + player.speed * dt
+        elseif love.keyboard.isDown("a") then
+            player.x = player.x - player.speed * dt
+        elseif love.keyboard.isDown("w") then
+            player.y = player.y - player.speed * dt
+        elseif love.keyboard.isDown("s") then
+            player.y = player.y + player.speed * dt
+        end
+   else
+        if player.x < 0 then
+            player.x = 1
+        elseif player.x > windowWidth - player.w - 1 then
+            player.x = windowWidth - 1 - player.w
+        elseif player.y < 0 then
+            player.y = 1
+        elseif player.y > windowHeight - player.h - 1 then
+            player.y = windowHeight - 1 - player.h
+        end
+   end
 end
 
 function love.update(dt)
-    movePlayer(dt)
     timer = timer + dt
     moveStars(dt)
+    if timer >= 2 then
+        generateEnemy()
+        timer = 0
+    end
     if i == true then
         createPlayer()
         generateStars()
         i = false
     end
-
+    
+    movePlayer(dt)
 end
 
 function love.draw(dt)
     love.graphics.points(stars)
     love.graphics.rectangle("fill", player.x, player.y, player.w, player.h)
+    for i, v in ipairs(enemies) do
+        love.graphics.setColor(255, 0, 0)
+        love.graphics.circle("fill", v.x, v.y, v.w, v.h)
+        love.graphics.setColor(255, 255, 255)
+    end
 end
 
 
