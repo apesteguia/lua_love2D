@@ -1,4 +1,7 @@
 package.path = package.path .. ";./?.lua;./?/init.lua"
+require("move")
+require("generate")
+
 function love.load()
     windowWidth = 1000
     windowHeight = 600
@@ -8,6 +11,7 @@ function love.load()
             fullscreen = false,
             centered = true
         })
+    r, g, b = 1, 1, 1
     timer = 0
     i = true
     stars = {}
@@ -15,94 +19,18 @@ function love.load()
     player = {}
 end
 
-function generateEnemy()
-    local e = {}
-    e.x = love.math.random(10, 1000)
-    e.y = 10
-    e.w = 60
-    e.h = 60
-    e.speed = 200
-    table.insert(enemies, e)
-end
-
-function createPlayer()
-    local p = {}
-    p.x = love.graphics.getWidth() / 2.2
-    p.y = love.graphics.getHeight() - 100
-    p.w = 50
-    p.h = 50
-    p.speed = 220
-    player = p
-end
-
-function generateStars()
-    local screen_width, screen_height = love.graphics.getDimensions()
-    local max_stars = 10000   -- how many stars we want
-
-    for i=1, max_stars do   -- generate the coords of our stars
-        local x = love.math.random(5, screen_width-5)
-        local y = love.math.random(-20000, 600)
-        stars[i] = {x, y}   -- stick the values into the table
-    end
-end
-
-function moveStars(dt)
-    for i, v in ipairs(stars) do
-        stars[i][2] = stars[i][2] + 100 * dt
-    end
-end
-
-function movePlayer(dt)
-    if love.keyboard.isDown("space") then
-        love.event.quit()
-    end
-    if player.x > 0 and player.x < windowWidth - player.w and player.y > 0 and player.y < windowHeight - player.h then
-        if love.keyboard.isDown("d") and love.keyboard.isDown("w") then
-            player.x = player.x + player.speed * dt * 0.3
-            player.y = player.y - player.speed * dt * 0.3
-        elseif love.keyboard.isDown("d") and love.keyboard.isDown("s") then
-            player.x = player.x + player.speed * dt * 0.3
-            player.y = player.y + player.speed * dt * 0.5
-        elseif love.keyboard.isDown("a") and love.keyboard.isDown("s") then
-            player.x = player.x - player.speed * dt * 0.3
-            player.y = player.y + player.speed * dt * 0.5
-        elseif love.keyboard.isDown("a") and love.keyboard.isDown("w") then
-            player.x = player.x + player.speed * dt * 0.3
-            player.y = player.y - player.speed * dt * 0.5
-        end
-
-        if love.keyboard.isDown("d") then
-            player.x = player.x + player.speed * dt
-        elseif love.keyboard.isDown("a") then
-            player.x = player.x - player.speed * dt
-        elseif love.keyboard.isDown("w") then
-            player.y = player.y - player.speed * dt
-        elseif love.keyboard.isDown("s") then
-            player.y = player.y + player.speed * dt
-        end
-   else
-        if player.x < 0 then
-            player.x = 1
-        elseif player.x > windowWidth - player.w - 1 then
-            player.x = windowWidth - 1 - player.w
-        elseif player.y < 0 then
-            player.y = 1
-        elseif player.y > windowHeight - player.h - 1 then
-            player.y = windowHeight - 1 - player.h
-        end
-   end
-end
-
 function love.update(dt)
     timer = timer + dt
     moveStars(dt)
-    if timer >= 2 then
+    moveEnemy(dt)
+    if timer >= 1 then
+        r, g, b = love.math.random() , love.math.random() , love.math.random() 
         generateEnemy()
         timer = 0
     end
     if i == true then
         createPlayer()
-        generateStars()
+        generateStars() 
         i = false
     end
     
@@ -113,7 +41,7 @@ function love.draw(dt)
     love.graphics.points(stars)
     love.graphics.rectangle("fill", player.x, player.y, player.w, player.h)
     for i, v in ipairs(enemies) do
-        love.graphics.setColor(255, 0, 0)
+        love.graphics.setColor(r, g, b)
         love.graphics.circle("fill", v.x, v.y, v.w, v.h)
         love.graphics.setColor(255, 255, 255)
     end
